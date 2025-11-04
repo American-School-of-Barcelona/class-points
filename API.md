@@ -15,11 +15,13 @@ a python wrapper for this API.
 }
 ```
 
-### GET `/points/<student>/amount`
+### GET `/points/<student>`
 
 ```json
 {
-    "amount": 10,
+    "id": 10,
+    "name": "mathis",
+    "points": 10,
 }
 ```
 
@@ -30,7 +32,7 @@ a python wrapper for this API.
     "history": [
         {
             "change": 10,
-            "reason": "my reason here"
+            "reason": "my reason here",
             "date": "YYYY-MM-DDTHH:mm:ssZ"
         },
         // ...
@@ -54,6 +56,7 @@ Response:
 {
     "name": "mathis",
     "id": 10,
+    "points": 0,
 }
 
 ### POST `/students/list`
@@ -64,7 +67,7 @@ Response:
         {
             "id": 10,
             "name": "mathis",
-            "amount": 10,
+            "points": 10,
         }
     ]
 }
