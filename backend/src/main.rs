@@ -1,4 +1,9 @@
-use axum::{Router, routing::{get, post}};
+#![warn(clippy::pedantic)]
+
+use axum::{
+    Router,
+    routing::{get, post},
+};
 use std::sync::Arc;
 
 pub mod db;
@@ -16,7 +21,7 @@ pub struct App {
 
 impl App {
     pub async fn init() -> Result<Arc<App>, crate::Error> {
-        let pool: Pool = db::init().await?;
+        let pool: Pool = db::init()?;
         Ok(Arc::new(Self { pool }))
     }
 
@@ -30,7 +35,11 @@ async fn main() -> Result<(), crate::Error> {
     let state = App::init().await?;
 
     let app = Router::new()
-        .route("/student/new", post(handlers::students::handler))
+        .route("/student/new", post(handlers::students::new))
+        .route("/student/list", get(handlers::students::list))
+        .route("/points/{id}", get(handlers::points::amount))
+        .route("/points/{id}/modify", post(handlers::points::modify))
+        .route("/points/{id}/history", get(handlers::points::history))
         .with_state(state);
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
 

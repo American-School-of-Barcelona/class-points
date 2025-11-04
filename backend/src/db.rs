@@ -11,7 +11,7 @@ pub type Connection = SyncConnectionWrapper<SqliteConnection>;
 pub type Pool = deadpool::Pool<Connection>;
 pub type Object = deadpool::Object<Connection>;
 
-pub async fn init() -> Result<Pool, crate::Error> {
+pub fn init() -> Result<Pool, crate::Error> {
     dotenv().ok();
     let url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let manager = AsyncDieselConnectionManager::<Connection>::new(url);

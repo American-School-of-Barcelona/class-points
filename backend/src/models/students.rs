@@ -3,16 +3,35 @@ use serde::{Deserialize, Serialize};
 
 use crate::schema::students;
 
-#[derive(Queryable, Selectable, Serialize, Debug, Clone)]
+#[derive(
+    Insertable,
+    Queryable,
+    QueryableByName,
+    Selectable,
+    Deserialize,
+    Serialize,
+    Debug,
+    Clone,
+    Default,
+)]
 #[diesel(table_name = students)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Student {
+    #[serde(skip_deserializing)]
+    #[diesel(skip_insertion)]
     pub id: i32,
     pub name: String,
+    #[diesel(skip_insertion)]
+    #[serde(skip_deserializing)]
+    pub points: i32,
 }
 
-#[derive(Insertable, Deserialize, Debug, Clone)]
-#[diesel(table_name = students)]
-pub struct New {
-    pub name: String,
+impl Student {
+    #[must_use]
+    pub fn new(name: String) -> Self {
+        Self {
+            name,
+            ..Default::default()
+        }
+    }
 }
