@@ -1,5 +1,5 @@
 use axum::{Json, Router, extract::State, routing::get};
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, SqliteConnection};
+use diesel::{QueryDsl, RunQueryDsl, SelectableHelper, SqliteConnection};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
