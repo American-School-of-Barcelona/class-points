@@ -40,12 +40,21 @@ a python wrapper for this API.
 
 ### POST `/students/new`
 
+Request Body:
+
 ```json
 {
-    "id": 10,
     "name": "mathis"  
 }
 ```
+
+Response:
+
+```json
+{
+    "name": "mathis",
+    "id": 10,
+}
 
 ### POST `/students/list`
 
