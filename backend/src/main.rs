@@ -35,8 +35,8 @@ async fn main() -> Result<(), crate::Error> {
     let state = App::init().await?;
 
     let app = Router::new()
-        .route("/student/new", post(handlers::students::new))
-        .route("/student/list", get(handlers::students::list))
+        .route("/students/new", post(handlers::students::new))
+        .route("/students/list", get(handlers::students::list))
         .route("/points/{id}", get(handlers::points::amount))
         .route("/points/{id}/modify", post(handlers::points::modify))
         .route("/points/{id}/history", get(handlers::points::history))
