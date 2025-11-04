@@ -5,4 +5,7 @@ pub enum Error {
 
     #[error("sqlite connection error: {0}")]
     Sqlite(#[from] diesel::ConnectionError),
+
+    #[error("database error: {0}")]
+    Diesel(#[from] diesel::result::Error),
 }

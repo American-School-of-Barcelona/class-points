@@ -1,25 +1,24 @@
 use std::env;
 
-use diesel::{Connection, RunQueryDsl, SelectableHelper, SqliteConnection};
+use diesel::SqliteConnection;
+use diesel_async::{
+    pooled_connection::{AsyncDieselConnectionManager, deadpool},
+    sync_connection_wrapper::SyncConnectionWrapper,
+};
 use dotenvy::dotenv;
 
-use crate::models::{NewPost, Post};
+pub type Connection = SyncConnectionWrapper<SqliteConnection>;
+pub type Pool = deadpool::Pool<Connection>;
+pub type Object = deadpool::Object<Connection>;
 
-pub fn init() -> Result<SqliteConnection, crate::Error> {
+pub async fn init() -> Result<Pool, crate::Error> {
     dotenv().ok();
     let url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let connection = SqliteConnection::establish(&url)?;
+    let manager = AsyncDieselConnectionManager::<Connection>::new(url);
 
-    Ok(connection)
-}
+    let pool = deadpool::Pool::builder(manager)
+        .build()
+        .expect("Failed to create pool");
 
-pub fn create_post(conn: &mut SqliteConnection, title: &str, body: &str) -> Post {
-    use crate::schema::posts;
-
-    let new_post = NewPost { title, body };
-    diesel::insert_into(posts::table)
-        .values(&new_post)
-        .returning(Post::as_returning())
-        .get_result(conn)
-        .unwrap()
+    Ok(pool)
 }

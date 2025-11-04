@@ -1,10 +1,8 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    posts (id) {
+    students (id) {
         id -> Integer,
-        title -> Text,
-        body -> Text,
-        published -> Bool,
+        name -> Text,
     }
 }
