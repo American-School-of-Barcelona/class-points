@@ -63,16 +63,37 @@ pub async fn modify(
 ) -> Result<Json<models::Student>, StatusCode> {
     let connection = &mut state.db().await;
 
-    let student = diesel::update(schema::students::table.filter(schema::students::id.eq(id)))
-        .set(schema::students::points.eq(payload.amount))
-        .returning(&models::Student::as_returning())
-        .get_result(connection)
-        .await
-        .status()?;
+    let update = diesel::update(schema::students::table.filter(schema::students::id.eq(id)));
+    let (student, delta) = if payload.set {
+        let old: models::Student = schema::students::table
+            .filter(schema::students::id.eq(id))
+            .first(connection)
+            .await
+            .status()?;
+
+        let result = update
+            .set(schema::students::points.eq(payload.amount))
+            .returning(models::Student::as_returning())
+            .get_result(connection)
+            .await
+            .status()?;
+
+        let delta = result.points - old.points;
+        (result, delta)
+    } else {
+        let result = update
+            .set(schema::students::points.eq(schema::students::points + payload.amount))
+            .returning(models::Student::as_returning())
+            .get_result(connection)
+            .await
+            .status()?;
+
+        (result, payload.amount)
+    };
 
     diesel::insert_into(schema::records::table)
         .values(&models::Record {
-            change: payload.amount,
+            change: delta,
             reason: payload.reason,
             date: chrono::Utc::now().to_rfc3339(),
             student: id,
