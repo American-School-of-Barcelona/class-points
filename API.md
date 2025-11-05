@@ -3,9 +3,86 @@
 This is a json API for interacting with the backend. Later, we will create
 a python wrapper for this API.
 
+## Table of Contents
+
+- [API](#api)
+  - [Table of Contents](#table-of-contents)
+  - [Endpoints](#endpoints)
+    - [`/users` - Users \& Authentication](#users---users--authentication)
+      - [POST `/users/register`](#post-usersregister)
+      - [POST `/users/verify?code=xxxx`](#post-usersverifycodexxxx)
+      - [GET `/users/authenticated`](#get-usersauthenticated)
+      - [POST `/users/list`](#post-userslist)
+    - [`/points` - Points](#points---points)
+      - [POST `/points/<student>/modify`](#post-pointsstudentmodify)
+      - [GET `/points/<student>`](#get-pointsstudent)
+      - [GET `/points/<student>/history`](#get-pointsstudenthistory)
+
 ## Endpoints
 
-### Points
+### `/users` - Users & Authentication
+
+#### POST `/users/register`
+
+Request Body:
+
+```json
+{
+    "name": "mathis",
+    "email": "mathis@asbarcelona.com",
+    "password": "asdf1234"  
+}
+```
+
+Response:
+
+```json
+{
+    "email": "mathis@asbarcelona.com",
+}
+```
+
+#### POST `/users/verify?code=xxxx`
+
+Response:
+
+```json
+{
+    "id": 10,
+    "name": "mathis",
+    "points": 0,
+    "role": 0
+}
+```
+
+#### GET `/users/authenticated`
+
+This endpoint requires you be authenticated.
+
+```json
+{
+    "id": 2,
+    "name": "jimmybob",
+    "points": 0,
+    "role": 0
+}
+```
+
+#### POST `/users/list`
+
+```json
+{
+    "students": [
+        {
+            "id": 10,
+            "name": "mathis",
+            "points": 10,
+        }
+    ]
+}
+```
+
+### `/points` - Points
 
 #### POST `/points/<student>/modify`
 
@@ -41,68 +118,6 @@ This requires you to authenticate, and is restricted to users with role 1 or abo
             "date": "YYYY-MM-DDTHH:mm:ssZ"
         },
         // ...
-    ]
-}
-```
-
-### Users & Authentication
-
-#### GET `/users/authenticated`
-
-This endpoint requires you be authenticated.
-
-```json
-{
-    "id": 2,
-    "name": "jimmybob",
-    "points": 0,
-    "role": 0
-}
-```
-
-#### POST `/users/register`
-
-Request Body:
-
-```json
-{
-    "name": "mathis",
-    "email": "mathis@asbarcelona.com",
-    "password": "asdf1234"  
-}
-```
-
-Response:
-
-```json
-{
-    "email": "mathis@asbarcelona.com",
-}
-```
-
-#### POST `/users/verify?code=xxxx`
-
-Response:
-
-```json
-{
-    "id": 10,
-    "name": "mathis",
-    "points": 0,
-    "role": 0
-}
-```
-
-#### POST `/users/list`
-
-```json
-{
-    "students": [
-        {
-            "id": 10,
-            "name": "mathis",
-            "points": 10,
-        }
     ]
 }
 ```
