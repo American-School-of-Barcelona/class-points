@@ -5,7 +5,11 @@ a python wrapper for this API.
 
 ## Endpoints
 
-### POST `/points/<student>/modify`
+### Points
+
+#### POST `/points/<student>/modify`
+
+This requires you to authenticate, and is restricted to users with role 1 or above.
 
 ```json
 {
@@ -15,7 +19,7 @@ a python wrapper for this API.
 }
 ```
 
-### GET `/points/<student>`
+#### GET `/points/<student>`
 
 ```json
 {
@@ -25,7 +29,7 @@ a python wrapper for this API.
 }
 ```
 
-### GET `/points/<student>/history`
+#### GET `/points/<student>/history`
 
 ```json
 {
@@ -41,13 +45,30 @@ a python wrapper for this API.
 }
 ```
 
-### POST `/students/new`
+### Users & Authentication
+
+#### GET `/users/authenticated`
+
+This endpoint requires you be authenticated.
+
+```json
+{
+    "id": 2,
+    "name": "jimmybob",
+    "points": 0,
+    "role": 0
+}
+```
+
+#### POST `/users/register`
 
 Request Body:
 
 ```json
 {
-    "name": "mathis"  
+    "name": "mathis",
+    "email": "mathis@asbarcelona.com",
+    "password": "asdf1234"  
 }
 ```
 
@@ -55,12 +76,24 @@ Response:
 
 ```json
 {
-    "name": "mathis",
-    "id": 10,
-    "points": 0,
+    "email": "mathis@asbarcelona.com",
 }
+```
 
-### POST `/students/list`
+#### POST `/users/verify?code=xxxx`
+
+Response:
+
+```json
+{
+    "id": 10,
+    "name": "mathis",
+    "points": 0,
+    "role": 0
+}
+```
+
+#### POST `/users/list`
 
 ```json
 {
