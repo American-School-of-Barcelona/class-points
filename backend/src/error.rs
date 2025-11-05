@@ -14,6 +14,18 @@ pub enum Error {
 
     #[error("pool error: {0}")]
     Pool(#[from] deadpool::PoolError),
+
+    #[error("missing environment variable: {0}")]
+    Env(#[from] std::env::VarError),
+
+    #[error("smtp error: {0}")]
+    Smtp(#[from] lettre::transport::smtp::Error),
+
+    #[error("email address error: {0}")]
+    Address(#[from] lettre::address::AddressError),
+
+    #[error("email content error: {0}")]
+    Lettre(#[from] lettre::error::Error),
 }
 
 pub trait AsStatus<T> {

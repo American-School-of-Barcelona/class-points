@@ -31,19 +31,27 @@ pub struct User {
     pub points: i32,
     pub role: i32,
     #[serde(skip_serializing)]
+    pub email: String,
+    #[serde(skip_serializing)]
     pub password: Vec<u8>,
     #[serde(skip_serializing)]
     pub salt: Vec<u8>,
 }
 
 impl User {
+    pub fn hash(password: String, salt: &[u8]) -> Vec<u8> {
+        let password = [password.as_bytes(), salt].concat();
+        sha2::Sha256::digest(password).to_vec()
+    }
+
     #[must_use]
-    pub fn new(name: String, password: String, role: i32) -> Self {
+    pub fn new(name: String, email: String, password: String, role: i32) -> Self {
         let salt: Vec<u8> = rand::random_iter().take(8).collect();
-        let password = [password.as_bytes(), &salt].concat();
-        let hashed = sha2::Sha256::digest(password).to_vec();
+        let hashed = Self::hash(password, &salt);
+
         Self {
             name,
+            email,
             password: hashed,
             salt,
             role,

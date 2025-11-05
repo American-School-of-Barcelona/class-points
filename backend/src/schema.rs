@@ -15,6 +15,7 @@ diesel::table! {
     users (id) {
         id -> Integer,
         name -> Text,
+        email -> Text,
         points -> Integer,
         role -> Integer,
         password -> Binary,

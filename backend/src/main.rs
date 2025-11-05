@@ -5,6 +5,7 @@ use axum::{
     routing::{get, patch, post},
 };
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub mod db;
 pub mod error;
@@ -13,17 +14,22 @@ pub mod models;
 pub mod schema;
 pub use error::Error;
 pub mod auth;
+pub mod email;
 
-use crate::db::Pool;
+use crate::{db::Pool, models::User};
 
 pub struct App {
     pool: Pool,
+    verifications: Mutex<Vec<(u16, User)>>,
 }
 
 impl App {
     pub async fn init() -> Result<Arc<App>, crate::Error> {
         let pool: Pool = db::init().await?;
-        Ok(Arc::new(Self { pool }))
+        Ok(Arc::new(Self {
+            pool,
+            verifications: Mutex::new(Vec::new()),
+        }))
     }
 
     pub async fn db(&self) -> db::Object {
@@ -37,7 +43,9 @@ async fn main() -> Result<(), crate::Error> {
 
     let app = Router::new()
         .route("/users/register", post(handlers::users::register))
-        .route("/students/list", get(handlers::users::list))
+        .route("/users/verify", post(handlers::users::verify))
+        .route("/users/authenticated", get(handlers::users::authenticated))
+        .route("/users/list", get(handlers::users::list))
         .route("/points/{id}", get(handlers::points::amount))
         .route("/points/{id}/modify", patch(handlers::points::modify))
         .route("/points/{id}/history", get(handlers::points::history))

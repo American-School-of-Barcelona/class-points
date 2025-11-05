@@ -1,7 +1,6 @@
 use axum_extra::headers::authorization::Basic;
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
-use sha2::Digest;
 
 use crate::{db::Object, models::User, schema::users};
 
@@ -17,10 +16,8 @@ pub async fn authenticate(
         .optional()?;
 
     if let Some(user) = &user {
-        let hashed =
-            sha2::Sha256::digest([credentials.password().as_bytes(), &user.salt].concat()).to_vec();
-
-        if hashed != user.password {
+        let hash = User::hash(credentials.password().to_string(), &user.salt);
+        if hash != user.password {
             return Ok(None);
         }
     }

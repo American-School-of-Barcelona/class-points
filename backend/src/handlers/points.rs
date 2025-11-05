@@ -88,7 +88,8 @@ pub async fn modify(
 
     let update = diesel::update(schema::users::table.filter(schema::users::id.eq(id)));
     let (student, delta) = if payload.set {
-        let old: models::User = schema::users::table
+        let old: i32 = schema::users::table
+            .select(schema::users::points)
             .filter(schema::users::id.eq(id))
             .first(connection)
             .await
@@ -101,7 +102,7 @@ pub async fn modify(
             .await
             .status()?;
 
-        let delta = result.points - old.points;
+        let delta = result.points - old;
         (result, delta)
     } else {
         let result = update
