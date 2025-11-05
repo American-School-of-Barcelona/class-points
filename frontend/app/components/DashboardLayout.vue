@@ -1,5 +1,5 @@
 <script setup>
-import WidgetCard from './WidgetCard.vue'
+import List from './List.vue'
 </script>
 
 <template>
@@ -8,27 +8,9 @@ import WidgetCard from './WidgetCard.vue'
             <div class="header">
                 <h1>Dashboard</h1>
             </div>
-            <div class="grid">
-                <WidgetCard title="yo gurt 1">
-                    <p>lorem ipsum or sum like that</p>
-                </WidgetCard>
 
-                <WidgetCard title="yo gurt 2">
-                    <p>lorem ipsum or sum like that</p>
-                </WidgetCard>
+            <List></List>
 
-                <WidgetCard title="yo gurt 3">
-                    <p>lorem ipsum or sum like that</p>
-                </WidgetCard>
-
-                <WidgetCard title="wide yo gurt" class="wide">
-                    <p>lorem ipsum or sum like that BUT WIDDDDDDDDDDDDDDDDDDDDEEEEEEEEEEEEEEEEEEEEEEEEEEEE</p>
-                </WidgetCard>
-                <WidgetCard title="yo gurt 4">
-                    <p>lorem ipsum or sum like that</p>
-                </WidgetCard>
-
-            </div>
         </div>
     </div>
 </template>
