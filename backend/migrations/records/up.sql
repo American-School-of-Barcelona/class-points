@@ -3,5 +3,6 @@ CREATE TABLE records (
     reason TEXT NOT NULL,
     date TEXT NOT NULL,
     student INTEGER NOT NULL,
+    points INTEGER NOT NULL,
     FOREIGN KEY (student) REFERENCES students(id)
 )

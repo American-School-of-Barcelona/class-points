@@ -2,7 +2,7 @@
 
 use axum::{
     Router,
-    routing::{get, post},
+    routing::{get, patch, post},
 };
 use std::sync::Arc;
 
@@ -12,6 +12,7 @@ pub mod handlers;
 pub mod models;
 pub mod schema;
 pub use error::Error;
+pub mod auth;
 
 use crate::db::Pool;
 
@@ -21,7 +22,7 @@ pub struct App {
 
 impl App {
     pub async fn init() -> Result<Arc<App>, crate::Error> {
-        let pool: Pool = db::init()?;
+        let pool: Pool = db::init().await?;
         Ok(Arc::new(Self { pool }))
     }
 
@@ -35,10 +36,10 @@ async fn main() -> Result<(), crate::Error> {
     let state = App::init().await?;
 
     let app = Router::new()
-        .route("/students/new", post(handlers::students::new))
-        .route("/students/list", get(handlers::students::list))
+        .route("/users/register", post(handlers::users::register))
+        .route("/students/list", get(handlers::users::list))
         .route("/points/{id}", get(handlers::points::amount))
-        .route("/points/{id}/modify", post(handlers::points::modify))
+        .route("/points/{id}/modify", patch(handlers::points::modify))
         .route("/points/{id}/history", get(handlers::points::history))
         .with_state(state);
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;

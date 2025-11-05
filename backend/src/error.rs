@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use diesel_async::pooled_connection::deadpool;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -10,6 +11,9 @@ pub enum Error {
 
     #[error("database error: {0}")]
     Diesel(#[from] diesel::result::Error),
+
+    #[error("pool error: {0}")]
+    Pool(#[from] deadpool::PoolError),
 }
 
 pub trait AsStatus<T> {

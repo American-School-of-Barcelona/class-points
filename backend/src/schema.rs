@@ -12,13 +12,14 @@ diesel::table! {
 }
 
 diesel::table! {
-    students (id) {
+    users (id) {
         id -> Integer,
         name -> Text,
         points -> Integer,
+        role -> Integer,
+        password -> Binary,
+        salt -> Binary,
     }
 }
 
-diesel::joinable!(records -> students (student));
-
-diesel::allow_tables_to_appear_in_same_query!(records, students,);
+diesel::allow_tables_to_appear_in_same_query!(records, users,);

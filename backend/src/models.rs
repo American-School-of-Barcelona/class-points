@@ -1,4 +1,4 @@
-pub mod students;
-pub use students::Student;
+pub mod users;
+pub use users::User;
 pub mod records;
 pub use records::Record;

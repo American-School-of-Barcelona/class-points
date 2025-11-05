@@ -1,2 +1,2 @@
 pub mod points;
-pub mod students;
+pub mod users;

@@ -13,7 +13,6 @@ pub struct Record {
     pub points: i32,
     pub reason: String,
     pub date: String,
-
     #[serde(skip_serializing)]
     pub student: i32,
 }

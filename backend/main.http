@@ -1,25 +1,27 @@
 ### Modify
-POST http://localhost:3000/points/1/modify HTTP/1.1
+PATCH http://localhost:3000/points/1/modify HTTP/1.1
 Content-Type: application/json
+Authorization: Basic admin:admin
 
 {
-    "amount": 5,
+    "amount": 1000,
     "reason": "completed homework",
     "set": false
 }
 
 ### Points
-GET http://localhost:3000/points/1 HTTP/1.1
+GET http://localhost:3000/points/2 HTTP/1.1
 
 ### History
-GET http://localhost:3000/points/3/history HTTP/1.1
+GET http://localhost:3000/points/1/history HTTP/1.1
 
 ### New Student
-POST http://localhost:3000/students/new HTTP/1.1
+POST http://localhost:3000/users/register HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "alice"
+    "name": "alice",
+    "password": "password"
 }
 
 ### Student List

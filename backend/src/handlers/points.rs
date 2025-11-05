@@ -5,12 +5,24 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
 };
+use axum_extra::{
+    TypedHeader,
+    headers::{Authorization, authorization::Basic},
+};
 use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::{App, error::AsStatus, models, schema};
+use crate::{
+    App, auth,
+    error::AsStatus,
+    models::{
+        self,
+        users::{ROLE_ADMIN, ROLE_TEACHER},
+    },
+    schema,
+};
 
 #[axum::debug_handler]
 pub async fn history(
@@ -35,12 +47,12 @@ pub async fn history(
 pub async fn amount(
     State(state): State<Arc<App>>,
     Path(id): Path<i32>,
-) -> Result<Json<models::Student>, StatusCode> {
+) -> Result<Json<models::User>, StatusCode> {
     let connection = &mut state.db().await;
 
-    let student = schema::students::table
-        .select(models::Student::as_select())
-        .filter(schema::students::id.eq(id))
+    let student = schema::users::table
+        .select(models::User::as_select())
+        .filter(schema::users::id.eq(id))
         .first(connection)
         .await
         .status()?;
@@ -57,23 +69,34 @@ pub struct Modify {
 
 #[debug_handler]
 pub async fn modify(
+    TypedHeader(Authorization(credentials)): TypedHeader<Authorization<Basic>>,
     State(state): State<Arc<App>>,
     Path(id): Path<i32>,
     Json(payload): Json<Modify>,
-) -> Result<Json<models::Student>, StatusCode> {
+) -> Result<Json<models::User>, StatusCode> {
     let connection = &mut state.db().await;
+    let Some(user) = auth::authenticate(connection, &credentials)
+        .await
+        .status()?
+    else {
+        return Err(StatusCode::FORBIDDEN);
+    };
 
-    let update = diesel::update(schema::students::table.filter(schema::students::id.eq(id)));
+    if user.role != ROLE_TEACHER && user.role != ROLE_ADMIN {
+        return Err(StatusCode::FORBIDDEN);
+    }
+
+    let update = diesel::update(schema::users::table.filter(schema::users::id.eq(id)));
     let (student, delta) = if payload.set {
-        let old: models::Student = schema::students::table
-            .filter(schema::students::id.eq(id))
+        let old: models::User = schema::users::table
+            .filter(schema::users::id.eq(id))
             .first(connection)
             .await
             .status()?;
 
         let result = update
-            .set(schema::students::points.eq(payload.amount))
-            .returning(models::Student::as_returning())
+            .set(schema::users::points.eq(payload.amount))
+            .returning(models::User::as_returning())
             .get_result(connection)
             .await
             .status()?;
@@ -82,8 +105,8 @@ pub async fn modify(
         (result, delta)
     } else {
         let result = update
-            .set(schema::students::points.eq(schema::students::points + payload.amount))
-            .returning(models::Student::as_returning())
+            .set(schema::users::points.eq(schema::users::points + payload.amount))
+            .returning(models::User::as_returning())
             .get_result(connection)
             .await
             .status()?;
