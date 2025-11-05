@@ -10,6 +10,7 @@ use crate::schema::records;
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Record {
     pub change: i32,
+    pub points: i32,
     pub reason: String,
     pub date: String,
 

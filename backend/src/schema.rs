@@ -7,6 +7,7 @@ diesel::table! {
         reason -> Text,
         date -> Text,
         student -> Integer,
+        points -> Integer,
     }
 }
 

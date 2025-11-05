@@ -32,6 +32,7 @@ a python wrapper for this API.
     "history": [
         {
             "change": 10,
+            "points": 10,
             "reason": "my reason here",
             "date": "YYYY-MM-DDTHH:mm:ssZ"
         },

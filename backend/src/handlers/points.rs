@@ -93,6 +93,7 @@ pub async fn modify(
 
     diesel::insert_into(schema::records::table)
         .values(&models::Record {
+            points: student.points,
             change: delta,
             reason: payload.reason,
             date: chrono::Utc::now().to_rfc3339(),

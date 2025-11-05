@@ -30,6 +30,7 @@ pub async fn new(
     let initial: String = diesel::insert_into(records)
         .values(&models::Record {
             change: 0,
+            points: 0,
             reason: String::from("init"),
             date: chrono::Utc::now().to_rfc3339(),
             student: result.id,

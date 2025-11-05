@@ -12,7 +12,7 @@ Content-Type: application/json
 GET http://localhost:3000/points/1 HTTP/1.1
 
 ### History
-GET http://localhost:3000/points/1/history HTTP/1.1
+GET http://localhost:3000/points/3/history HTTP/1.1
 
 ### New Student
 POST http://localhost:3000/students/new HTTP/1.1
