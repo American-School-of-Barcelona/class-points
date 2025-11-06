@@ -2,6 +2,7 @@ use axum::http::StatusCode;
 use axum_extra::headers::authorization::{Basic, Bearer};
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
+use eyre::Result;
 
 use crate::{
     db::Object,
@@ -21,8 +22,8 @@ pub async fn login(db: &mut Object, credentials: &Basic) -> Option<String> {
         .optional()
         .ok()??;
 
-    let hash = User::hash(credentials.password().to_string(), &user.salt);
-    if hash != user.password {
+    let allowed = User::verify(&user.password, credentials.password()).ok()?;
+    if !allowed {
         return None;
     }
 

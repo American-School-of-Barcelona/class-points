@@ -54,7 +54,20 @@ pub async fn register(
     State(state): State<Arc<App>>,
     Json(payload): Json<Register>,
 ) -> Result<Json<serde_json::Value>, StatusCode> {
-    let user = User::new(payload.name, payload.email, payload.password, ROLE_STUDENT);
+    let connection = &mut state.db().await;
+    let count: i64 = schema::users::table
+        .select(diesel::dsl::count(schema::users::id))
+        .filter(schema::users::name.eq(&payload.name))
+        .or_filter(schema::users::email.eq(&payload.email))
+        .get_result(connection)
+        .await
+        .status()?;
+
+    if count > 0 {
+        return Err(StatusCode::CONFLICT);
+    }
+
+    let user = User::new(payload.name, payload.email, payload.password, ROLE_STUDENT).status()?;
     let email = state.verifications.registration(user).await.status()?;
 
     Ok(Json(json!({
@@ -74,13 +87,15 @@ pub async fn verify(
 ) -> Result<Json<User>, StatusCode> {
     let user = state
         .verifications
-        .verify(code)
+        .verify_registration(code)
         .await
         .ok_or(StatusCode::FORBIDDEN)?;
+
     let connection = &mut state.db().await;
-    diesel::insert_into(schema::users::table)
+    let user = diesel::insert_into(schema::users::table)
         .values(user.clone())
-        .execute(connection)
+        .returning(User::as_returning())
+        .get_result(connection)
         .await
         .status()?;
 

@@ -1,3 +1,4 @@
+use eyre::Result;
 use lettre::message::{Mailbox, Message, header};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{AsyncSmtpTransport, AsyncTransport, Tokio1Executor};

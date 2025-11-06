@@ -18,8 +18,7 @@ diesel::table! {
         email -> Text,
         points -> Integer,
         role -> Integer,
-        password -> Binary,
-        salt -> Binary,
+        password -> Text,
     }
 }
 

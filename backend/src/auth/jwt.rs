@@ -27,8 +27,6 @@ pub fn generate(id: i32) -> Result<String, crate::Error> {
         &EncodingKey::from_base64_secret(&secret)?,
     )?;
 
-    eprintln!("{}", token);
-
     Ok(token)
 }
 

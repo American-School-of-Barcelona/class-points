@@ -6,6 +6,7 @@ use diesel_async::{
     pooled_connection::{AsyncDieselConnectionManager, deadpool},
     sync_connection_wrapper::SyncConnectionWrapper,
 };
+use eyre::Result;
 
 use crate::{
     models::{User, users::ROLE_ADMIN},
@@ -25,7 +26,7 @@ pub async fn admin(db: &mut Object) -> Result<(), crate::Error> {
             email,
             password,
             ROLE_ADMIN,
-        ))
+        )?)
         .on_conflict_do_nothing()
         .execute(db)
         .await?;
@@ -34,7 +35,7 @@ pub async fn admin(db: &mut Object) -> Result<(), crate::Error> {
 }
 
 pub async fn init() -> Result<Pool, crate::Error> {
-    let manager = AsyncDieselConnectionManager::<Connection>::new(env::var("DB")?);
+    let manager = AsyncDieselConnectionManager::<Connection>::new(env::var("DATABASE_URL")?);
     let pool = deadpool::Pool::builder(manager)
         .build()
         .expect("Failed to create pool");

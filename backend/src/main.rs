@@ -4,7 +4,8 @@ use axum::{
     Router,
     routing::{get, patch, post},
 };
-use std::sync::Arc;
+use eyre::Result;
+use std::{sync::Arc, time::Duration};
 
 pub mod db;
 pub mod error;
@@ -35,12 +36,20 @@ impl App {
     pub async fn db(&self) -> db::Object {
         self.pool.get().await.unwrap()
     }
+
+    pub async fn worker(app: Arc<Self>) {
+        loop {
+            app.verifications.prune().await;
+            tokio::time::sleep(Duration::from_secs(5)).await;
+        }
+    }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), crate::Error> {
     dotenvy::dotenv()?;
     let state = App::init().await?;
+    let worker = tokio::spawn(App::worker(state.clone()));
 
     let app = Router::new()
         .route("/users/register", post(handlers::users::register))
@@ -57,5 +66,6 @@ async fn main() -> Result<(), crate::Error> {
     eprintln!("server: listening on {}", listener.local_addr()?);
     axum::serve(listener, app).await?;
 
+    worker.abort();
     Ok(())
 }

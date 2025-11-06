@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use diesel::result::DatabaseErrorKind;
 use diesel_async::pooled_connection::deadpool;
 
 #[derive(thiserror::Error, Debug)]
@@ -32,26 +33,32 @@ pub enum Error {
 
     #[error("error parsing environment: {0}")]
     DotEnvy(#[from] dotenvy::Error),
+
+    #[error("hashing error: {0}")]
+    Hash(#[from] argon2::password_hash::Error),
 }
 
 pub trait AsStatus<T> {
     fn status(self) -> Result<T, StatusCode>;
 }
 
-impl<T> AsStatus<T> for Result<T, diesel::result::Error> {
-    fn status(self) -> Result<T, StatusCode> {
-        self.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
-    }
-}
-
-impl<T> AsStatus<T> for Result<T, Error> {
+impl<T, E: Into<Error>> AsStatus<T> for Result<T, E> {
     fn status(self) -> Result<T, StatusCode> {
         match self {
             Ok(x) => Ok(x),
-            Err(error) => match error {
-                Error::Jwt(_) => Err(StatusCode::UNAUTHORIZED),
-                _ => Err(StatusCode::INTERNAL_SERVER_ERROR),
-            },
+            Err(error) => {
+                let error = error.into();
+                eprintln!("server: error: {error:?}");
+                match error {
+                    Error::Jwt(_) => Err(StatusCode::UNAUTHORIZED),
+                    Error::Diesel(diesel::result::Error::DatabaseError(kind, _))
+                        if kind == DatabaseErrorKind::UniqueViolation =>
+                    {
+                        Err(StatusCode::CONFLICT)
+                    }
+                    _ => Err(StatusCode::INTERNAL_SERVER_ERROR),
+                }
+            }
         }
     }
 }

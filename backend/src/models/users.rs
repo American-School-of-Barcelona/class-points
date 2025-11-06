@@ -1,8 +1,16 @@
+use std::cell::LazyCell;
+
+use argon2::{
+    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
+    password_hash::{SaltString, rand_core::OsRng},
+};
 use diesel::prelude::*;
+use eyre::Result;
 use serde::{Deserialize, Serialize};
-use sha2::Digest;
 
 use crate::schema::users;
+
+pub const ARGON2: LazyCell<Argon2> = LazyCell::new(|| Argon2::default());
 
 pub const ROLE_STUDENT: i32 = 0;
 pub const ROLE_TEACHER: i32 = 1;
@@ -33,29 +41,38 @@ pub struct User {
     #[serde(skip_serializing)]
     pub email: String,
     #[serde(skip_serializing)]
-    pub password: Vec<u8>,
-    #[serde(skip_serializing)]
-    pub salt: Vec<u8>,
+    pub password: String,
 }
 
 impl User {
-    pub fn hash(password: String, salt: &[u8]) -> Vec<u8> {
-        let password = [password.as_bytes(), salt].concat();
-        sha2::Sha256::digest(password).to_vec()
+    pub fn verify(hash: &str, password: &str) -> Result<bool, crate::Error> {
+        let result = ARGON2.verify_password(password.as_bytes(), &PasswordHash::new(hash)?);
+
+        match result {
+            Ok(_) => Ok(true),
+            Err(error) => match error {
+                argon2::password_hash::Error::Password => Ok(false),
+                error => Err(crate::Error::Hash(error)),
+            },
+        }
     }
 
     #[must_use]
-    pub fn new(name: String, email: String, password: String, role: i32) -> Self {
-        let salt: Vec<u8> = rand::random_iter().take(8).collect();
-        let hashed = Self::hash(password, &salt);
+    pub fn new(
+        name: String,
+        email: String,
+        password: String,
+        role: i32,
+    ) -> Result<Self, crate::Error> {
+        let salt = SaltString::generate(&mut OsRng);
+        let hashed = ARGON2.hash_password(password.as_bytes(), &salt)?;
 
-        Self {
+        Ok(Self {
             name,
             email,
-            password: hashed,
-            salt,
+            password: hashed.to_string(),
             role,
             ..Default::default()
-        }
+        })
     }
 }
