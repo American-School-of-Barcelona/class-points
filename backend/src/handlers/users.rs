@@ -7,7 +7,10 @@ use axum::{
 };
 use axum_extra::{
     TypedHeader,
-    headers::{Authorization, authorization::Basic},
+    headers::{
+        Authorization,
+        authorization::{Basic, Bearer},
+    },
 };
 use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
@@ -15,7 +18,7 @@ use serde::Deserialize;
 use serde_json::json;
 
 use crate::{
-    App, auth, email,
+    App, auth,
     error::AsStatus,
     models::{
         User,
@@ -52,17 +55,8 @@ pub async fn register(
     Json(payload): Json<Register>,
 ) -> Result<Json<serde_json::Value>, StatusCode> {
     let user = User::new(payload.name, payload.email, payload.password, ROLE_STUDENT);
-    let code: u16 = rand::random_range(0..9999);
-    email::send(
-        &user.email,
-        "Email Verification",
-        format!("Your code: {code}"),
-    )
-    .await
-    .status()?;
+    let email = state.verifications.registration(user).await.status()?;
 
-    let email = user.email.clone();
-    state.verifications.lock().await.push((code, user));
     Ok(Json(json!({
         "email": email
     })))
@@ -78,13 +72,11 @@ pub async fn verify(
     State(state): State<Arc<App>>,
     extract::Query(Code { code }): extract::Query<Code>,
 ) -> Result<Json<User>, StatusCode> {
-    let mut lock = state.verifications.lock().await;
-    let idx = lock
-        .iter()
-        .position(|x| x.0 == code)
-        .ok_or_else(|| StatusCode::UNAUTHORIZED)?;
-
-    let user = lock.remove(idx).1;
+    let user = state
+        .verifications
+        .verify(code)
+        .await
+        .ok_or(StatusCode::FORBIDDEN)?;
     let connection = &mut state.db().await;
     diesel::insert_into(schema::users::table)
         .values(user.clone())
@@ -96,17 +88,27 @@ pub async fn verify(
 }
 
 #[debug_handler]
-pub async fn authenticated(
-    TypedHeader(Authorization(credentials)): TypedHeader<Authorization<Basic>>,
+pub async fn login(
     State(state): State<Arc<App>>,
+    TypedHeader(Authorization(credentials)): TypedHeader<Authorization<Basic>>,
+) -> Result<Json<serde_json::Value>, StatusCode> {
+    let connection = &mut state.db().await;
+    let token = auth::login(connection, &credentials)
+        .await
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
+    Ok(Json(json!({
+        "token": token
+    })))
+}
+
+#[debug_handler]
+pub async fn authenticated(
+    State(state): State<Arc<App>>,
+    TypedHeader(Authorization(credentials)): TypedHeader<Authorization<Bearer>>,
 ) -> Result<Json<User>, StatusCode> {
     let connection = &mut state.db().await;
-    let authenticated = auth::authenticate(connection, &credentials)
-        .await
-        .status()?;
-    if let Some(user) = authenticated {
-        Ok(Json(user))
-    } else {
-        Err(StatusCode::UNAUTHORIZED)
-    }
+    let user = auth::authenticate(credentials, connection).await?;
+
+    Ok(Json(user))
 }

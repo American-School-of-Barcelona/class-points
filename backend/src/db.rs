@@ -6,7 +6,6 @@ use diesel_async::{
     pooled_connection::{AsyncDieselConnectionManager, deadpool},
     sync_connection_wrapper::SyncConnectionWrapper,
 };
-use dotenvy::dotenv;
 
 use crate::{
     models::{User, users::ROLE_ADMIN},
@@ -35,7 +34,6 @@ pub async fn admin(db: &mut Object) -> Result<(), crate::Error> {
 }
 
 pub async fn init() -> Result<Pool, crate::Error> {
-    dotenv().ok();
     let manager = AsyncDieselConnectionManager::<Connection>::new(env::var("DB")?);
     let pool = deadpool::Pool::builder(manager)
         .build()

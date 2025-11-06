@@ -7,7 +7,7 @@ use axum::{
 };
 use axum_extra::{
     TypedHeader,
-    headers::{Authorization, authorization::Basic},
+    headers::{Authorization, authorization::Bearer},
 };
 use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
@@ -69,18 +69,13 @@ pub struct Modify {
 
 #[debug_handler]
 pub async fn modify(
-    TypedHeader(Authorization(credentials)): TypedHeader<Authorization<Basic>>,
+    TypedHeader(Authorization(credentials)): TypedHeader<Authorization<Bearer>>,
     State(state): State<Arc<App>>,
     Path(id): Path<i32>,
     Json(payload): Json<Modify>,
 ) -> Result<Json<models::User>, StatusCode> {
     let connection = &mut state.db().await;
-    let Some(user) = auth::authenticate(connection, &credentials)
-        .await
-        .status()?
-    else {
-        return Err(StatusCode::FORBIDDEN);
-    };
+    let user = auth::authenticate(credentials, connection).await?;
 
     if user.role != ROLE_TEACHER && user.role != ROLE_ADMIN {
         return Err(StatusCode::FORBIDDEN);

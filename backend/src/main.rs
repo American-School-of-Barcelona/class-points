@@ -5,7 +5,6 @@ use axum::{
     routing::{get, patch, post},
 };
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 pub mod db;
 pub mod error;
@@ -15,12 +14,13 @@ pub mod schema;
 pub use error::Error;
 pub mod auth;
 pub mod email;
+pub mod verification;
 
-use crate::{db::Pool, models::User};
+use crate::{db::Pool, verification::Verifications};
 
 pub struct App {
     pool: Pool,
-    verifications: Mutex<Vec<(u16, User)>>,
+    verifications: Verifications,
 }
 
 impl App {
@@ -28,7 +28,7 @@ impl App {
         let pool: Pool = db::init().await?;
         Ok(Arc::new(Self {
             pool,
-            verifications: Mutex::new(Vec::new()),
+            verifications: Verifications::new(),
         }))
     }
 
@@ -39,11 +39,13 @@ impl App {
 
 #[tokio::main]
 async fn main() -> Result<(), crate::Error> {
+    dotenvy::dotenv()?;
     let state = App::init().await?;
 
     let app = Router::new()
         .route("/users/register", post(handlers::users::register))
         .route("/users/verify", post(handlers::users::verify))
+        .route("/users/login", post(handlers::users::login))
         .route("/users/authenticated", get(handlers::users::authenticated))
         .route("/users/list", get(handlers::users::list))
         .route("/points/{id}", get(handlers::points::amount))
