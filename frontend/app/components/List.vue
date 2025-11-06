@@ -10,6 +10,19 @@
       { id: 3, username: "CodeNinja", points: 88.75 },
       { id: 4, username: "DataDragon", points: 85.29 },
       { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
+      { id: 5, username: "ByteMaster", points: 80.05 },
     ];
   });
 </script>
@@ -40,7 +53,6 @@
 .styled-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 12px;
   background: rgba(255,255,255,0.05);
   border-radius: 12px;
   overflow: hidden;

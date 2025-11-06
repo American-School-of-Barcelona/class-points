@@ -8,9 +8,9 @@ import List from './List.vue'
             <div class="header">
                 <h1>Dashboard</h1>
             </div>
-
-            <List></List>
-
+            <div class="scroll-wrapper">
+              <List class="list"></List>
+            </div>
         </div>
     </div>
 </template>
@@ -21,6 +21,17 @@ body {
     background-color: var(--color-bg);
     font-family: 'Inter', sans-serif;
     height: 100vh;
+}
+.scroll-wrapper {
+  overflow: hidden;
+}
+
+.list {
+  overflow-y: scroll;
+  border-radius: 10px;
+  height: 100%;
+  padding-right: 10px;
+  box-sizing: content-box;
 }
 
 .app {
@@ -54,16 +65,22 @@ body {
     color: var(--color-accent);
 }
 
-.grid {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 1fr;
-    gap: 1rem;
-    width: 100%;
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.grid .wide {
-    grid-column: span 2;
+::-webkit-scrollbar-track {
+  background: var(--color-bg-alt);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-hover);
 }
 </style>
