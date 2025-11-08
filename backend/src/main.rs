@@ -59,7 +59,8 @@ async fn main() -> Result<(), crate::Error> {
         .allow_headers(Any);
 
     let app = Router::new()
-        .route("/", get(|| async { Redirect::permanent("/register") }))
+        .route("/", get(|| async { Redirect::permanent("/login") }))
+        .route("/login", get(handlers::web::login))
         .route("/register", get(handlers::web::register))
         .route("/assets/style.css", get(handlers::web::style))
         .route("/api/users/register", post(handlers::users::register))

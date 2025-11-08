@@ -10,16 +10,24 @@ use serde::{Deserialize, Serialize};
 
 use crate::{auth::jwt, error::AsStatus};
 
-#[derive(Debug, Serialize, Clone, Copy, Deserialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct Claims {
+    pub iat: u64,
+    pub iss: String,
     pub sub: i32,
-    pub exp: usize,
+    pub exp: u64,
 }
 
-pub fn generate(id: i32) -> Result<String, crate::Error> {
+pub fn generate(id: i32, issuer: &str) -> Result<String, crate::Error> {
     let secret = env::var("SECRET_KEY")?;
-    let exp = (Utc::now() + Duration::hours(128)).timestamp() as usize;
-    let claims = Claims { sub: id, exp };
+    let now = Utc::now();
+    let exp = (now + Duration::hours(128)).timestamp() as u64;
+    let claims = Claims {
+        sub: id,
+        exp,
+        iat: now.timestamp() as u64,
+        iss: issuer.to_owned(),
+    };
 
     let token = encode(
         &Header::default(),

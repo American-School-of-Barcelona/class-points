@@ -1,8 +1,9 @@
 use axum::http::StatusCode;
-use axum_extra::headers::authorization::{Basic, Bearer};
+use axum_extra::headers::authorization::Bearer;
 use diesel::{ExpressionMethods, OptionalExtension, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
 use eyre::Result;
+use serde::Deserialize;
 
 use crate::{
     db::Object,
@@ -13,21 +14,28 @@ use crate::{
 
 pub mod jwt;
 
-pub async fn login(db: &mut Object, credentials: &Basic) -> Option<String> {
+#[derive(Deserialize)]
+pub struct Login {
+    pub username: String,
+    pub password: String,
+    pub issuer: String,
+}
+
+pub async fn login(db: &mut Object, credentials: Login) -> Option<String> {
     let user = users::table
         .select(User::as_select())
-        .filter(users::name.eq(credentials.username()))
+        .filter(users::name.eq(credentials.username))
         .first(db)
         .await
         .optional()
         .ok()??;
 
-    let allowed = User::verify(&user.password, credentials.password()).ok()?;
+    let allowed = User::verify(&user.password, &credentials.password).ok()?;
     if !allowed {
         return None;
     }
 
-    jwt::generate(user.id).ok()
+    jwt::generate(user.id, &credentials.issuer).ok()
 }
 
 pub async fn authenticate(

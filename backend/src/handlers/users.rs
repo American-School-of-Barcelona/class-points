@@ -7,10 +7,7 @@ use axum::{
 };
 use axum_extra::{
     TypedHeader,
-    headers::{
-        Authorization,
-        authorization::{Basic, Bearer},
-    },
+    headers::{Authorization, authorization::Bearer},
 };
 use diesel::{ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
@@ -105,10 +102,10 @@ pub async fn verify(
 #[debug_handler]
 pub async fn login(
     State(state): State<Arc<App>>,
-    TypedHeader(Authorization(credentials)): TypedHeader<Authorization<Basic>>,
+    Json(payload): Json<auth::Login>,
 ) -> Result<Json<serde_json::Value>, StatusCode> {
     let connection = &mut state.db().await;
-    let token = auth::login(connection, &credentials)
+    let token = auth::login(connection, payload)
         .await
         .ok_or(StatusCode::UNAUTHORIZED)?;
 

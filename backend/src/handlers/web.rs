@@ -8,6 +8,10 @@ async fn serve(file: &'static str) -> Result<String, StatusCode> {
     tokio::fs::read_to_string(file).await.status()
 }
 
+pub async fn login() -> Result<Html<String>, StatusCode> {
+    Ok(Html(serve("web/login.html").await?))
+}
+
 pub async fn register() -> Result<Html<String>, StatusCode> {
     Ok(Html(serve("web/register.html").await?))
 }
