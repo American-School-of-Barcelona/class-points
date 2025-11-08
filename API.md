@@ -11,8 +11,9 @@ a python wrapper for this API.
     - [`/users` - Users \& Authentication](#users---users--authentication)
       - [POST `/users/register`](#post-usersregister)
       - [POST `/users/verify?code=xxxx`](#post-usersverifycodexxxx)
+      - [POST `/users/login`](#post-userslogin)
+      - [GET `/users/list`](#get-userslist)
       - [GET `/users/authenticated`](#get-usersauthenticated)
-      - [POST `/users/list`](#post-userslist)
     - [`/points` - Points](#points---points)
       - [POST `/points/<student>/modify`](#post-pointsstudentmodify)
       - [GET `/points/<student>`](#get-pointsstudent)
@@ -24,13 +25,15 @@ a python wrapper for this API.
 
 #### POST `/users/register`
 
+Registers a new user.
+
 Request Body:
 
 ```json
 {
-    "name": "mathis",
-    "email": "mathis@asbarcelona.com",
-    "password": "asdf1234"  
+    "name": "john",
+    "email": "john@asbarcelona.com",
+    "password": "john"  
 }
 ```
 
@@ -38,47 +41,73 @@ Response:
 
 ```json
 {
-    "email": "mathis@asbarcelona.com",
+    "email": "john@asbarcelona.com",
 }
 ```
 
 #### POST `/users/verify?code=xxxx`
 
+Verifies a newly registered user with a verification code.
+This must be done *before* the first login.
+
 Response:
 
 ```json
 {
-    "id": 10,
-    "name": "mathis",
+    "id": 2,
+    "name": "john",
     "points": 0,
     "role": 0
 }
 ```
 
-#### GET `/users/authenticated`
+#### POST `/users/login`
 
-This endpoint requires you be authenticated.
+Logs in an existing user.
+
+Request Body:
 
 ```json
 {
-    "id": 2,
-    "name": "jimmybob",
-    "points": 0,
-    "role": 0
+  "name": "john",
+  "password": "password"
 }
 ```
 
-#### POST `/users/list`
+Response:
+
+```json
+{
+    "token": "<JWT_TOKEN>"
+}
+```
+
+#### GET `/users/list`
 
 ```json
 {
     "students": [
         {
-            "id": 10,
-            "name": "mathis",
+            "id": 2,
+            "name": "john",
             "points": 10,
-        }
+        },
+        // ...
     ]
+}
+```
+
+#### GET `/users/authenticated`
+
+Returns data about the authenticated user.
+This endpoint requires you be authenticated.
+
+```json
+{
+    "id": 2,
+    "name": "john",
+    "points": 0,
+    "role": 0
 }
 ```
 
