@@ -48,7 +48,7 @@ impl<T, E: Into<Error>> AsStatus<T> for Result<T, E> {
             Ok(x) => Ok(x),
             Err(error) => {
                 let error = error.into();
-                eprintln!("server: error: {error:?}");
+                eprintln!("server: {error}");
                 match error {
                     Error::Jwt(_) => Err(StatusCode::UNAUTHORIZED),
                     Error::Diesel(diesel::result::Error::DatabaseError(kind, _))
