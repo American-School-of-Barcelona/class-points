@@ -33,7 +33,7 @@ URL you want to handle the signin, and `issuer` should just be the name of your 
 An example authentication flow goes like so:
 
 1. User visits `https://myapp.com/`, and clicks a "login with ASBCS" button.
-2. The app directs them to `https://asbcs.com/register?callback=https://myapp.com/auth/&issuer=myapp`
+2. The app directs them to `https://asbcs.com/login?callback=https://myapp.com/auth/&issuer=myapp`
 3. ASBCS then processes the login, and redirects the user to `https://myasb.com/auth/?token=<JWT_TOKEN>`
 4. The frontend stores `<JWT_TOKEN>` as a cookie, and from there can send it to the backend when needed.
 
